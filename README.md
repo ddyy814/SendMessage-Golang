@@ -4,7 +4,7 @@
 3. Display online user list
 4. Group chat
 5. One-on-one chat
-6. offline message
+6. Offline message
 
 # Technologies
 - Programming language - Golang
