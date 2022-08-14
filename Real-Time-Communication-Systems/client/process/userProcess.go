@@ -1,15 +1,20 @@
-package main
+package process
 
 import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"go-code/SendMessageProject/Real-Time-Communication-Systems/common/message"
+	"go-code/SendMessageProject/Real-Time-Communication-Systems/server/utils"
 	"net"
 )
 
+type UserProcess struct {
+
+}
+
 //写一个函数完成登陆校验
-func login(userId int, userPwd string) (err error) {
+func (this *UserProcess) Login(userId int, userPwd string) (err error) {
 	
 	// 下一步开始定协议..
 	// fmt.Printf("userId = %d userPwd= %s", userId, userPwd)
@@ -76,7 +81,11 @@ func login(userId int, userPwd string) (err error) {
 	// time.Sleep(20 * time.Second)
 	// fmt.Println("Sleep 20..")
 	//这里还需要处理服务器端返回的消息
-	msg, err = readPkg((conn))
+
+	tf := &utils.Transfer{
+		Conn : conn,
+	}
+	msg, err = tf.ReadPkg()
 	
 	if err != nil {
 		fmt.Println("readPkg err=", err)
@@ -87,7 +96,17 @@ func login(userId int, userPwd string) (err error) {
 	var loginResMsg message.LoginResMsg
 	err = json.Unmarshal([]byte(msg.Data), &loginResMsg)
 	if loginResMsg.Code == 200 {
-		fmt.Println("用户登陆成功")
+		// fmt.Println("用户登陆成功")
+		
+		// 这里我们需要在客户端启动一个协程
+		//该协程保持和服务器端的通讯，如果服务器油数据推送给客户端
+		//则接收并显示在客户端终端
+		go serverProcessMsg(conn)
+		
+		// 1. 显示登陆成功后菜单
+		for {
+			ShowMenu()
+		}
 	}else if loginResMsg.Code == 500 {
 		fmt.Println(loginResMsg.Error)
 	}
