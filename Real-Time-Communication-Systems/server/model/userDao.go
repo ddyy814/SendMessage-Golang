@@ -3,8 +3,8 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/garyburd/redigo/redis"
+	"go-code/SendMessageProject/Real-Time-Communication-Systems/common/message"
 )
 
 // 我们在服务器启动后，就初始化一个userDao的实例
@@ -69,4 +69,29 @@ func (this *UserDao) Login(userId int, userPwd string) (user *User, err error) {
 		return
 	}
 	return 
+}
+
+func (this *UserDao) Register(user *message.User) (err error) {
+	//先从UserDao链接池取出一个链接
+	conn := this.pool.Get()
+	defer conn.Close()
+	_, err = this.getUserById(conn, user.UserId)
+	if err == nil {
+		err = ERROR_USER_EXISTS
+		return
+	}
+	
+	//这时， 说明ID在redis里还没有，所以可以完成注册
+	data, err := json.Marshal(user)
+	if err != nil {
+		return 
+	}
+
+	// 入库
+	_, err = conn.Do("HSet", "users",user.UserId, string(data))
+	if err != nil {
+		fmt.Println("保存注册用户错误 err=", err)
+		return 
+	}
+	return
 }

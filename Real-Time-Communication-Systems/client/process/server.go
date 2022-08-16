@@ -1,7 +1,9 @@
 package process
 
 import (
+	"encoding/json"
 	"fmt"
+	"go-code/SendMessageProject/Real-Time-Communication-Systems/common/message"
 	"go-code/SendMessageProject/Real-Time-Communication-Systems/server/utils"
 	"net"
 	"os"
@@ -21,7 +23,8 @@ func ShowMenu() {
 
 	switch key {
 	case 1:
-		fmt.Println("显示在线用户列表")
+		// fmt.Println("显示在线用户列表")
+		outputOnlineUser()
 	case 2:
 		fmt.Println("发送消息")
 	case 3:
@@ -47,7 +50,19 @@ func serverProcessMsg(conn net.Conn) {
 			fmt.Println("Readpkg err", err)
 			return
 		}
-		//如果读取到消息，
-		fmt.Printf("msg=%v\n", msg)
+		//如果读取到消息，下一步处理逻辑
+		// fmt.Printf("msg=%v\n", msg)
+		switch msg.Type {
+		case message.NotifyUserStatusMsgType : //有人上线了
+			// 1. 取出NotifyUserStatusMsg
+			var notifyUserStatusMsg message.NotifyUserStatusMsg
+			json.Unmarshal([]byte(msg.Data), &notifyUserStatusMsg)
+
+			// 2. 把这个用户的信息状态保存到客户map[int]User中
+			updateUserStatus(&notifyUserStatusMsg)
+		default:
+			fmt.Println("u服务器端返回了未知的消息类型")
+		}
+
 	}
 }
