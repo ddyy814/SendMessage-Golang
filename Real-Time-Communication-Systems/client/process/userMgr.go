@@ -3,10 +3,13 @@ package process
 import (
 	"fmt"
 	"go-code/SendMessageProject/Real-Time-Communication-Systems/common/message"
+	"go-code/SendMessageProject/Real-Time-Communication-Systems/client/model"
 )
 
 // 客户端要维护的mp
 var onlineUsers map[int]*message.User = make(map[int]*message.User, 10)
+var CurUser model.CurUser //我们在用户登陆成功后， 完成对CurUser初始化
+
 
 //在客户端显示当前在线用户
 func outputOnlineUser() {

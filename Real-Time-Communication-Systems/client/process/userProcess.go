@@ -166,7 +166,10 @@ func (this *UserProcess) Login(userId int, userPwd string) (err error) {
 	err = json.Unmarshal([]byte(msg.Data), &loginResMsg)
 	if loginResMsg.Code == 200 {
 		// fmt.Println("用户登陆成功")
-
+		//初始化CurUser
+		CurUser.Conn = conn
+		CurUser.UserId = userId
+		CurUser.UserStatus = message.UserOnline
 		//可以显示当前在线用户列表，遍历loginResMsg.UsersId
 		fmt.Println("当前在线用户列表如下:")
 		for _, v := range loginResMsg.UserId {
@@ -178,7 +181,7 @@ func (this *UserProcess) Login(userId int, userPwd string) (err error) {
 			fmt.Println("用户ID:\t", v)
 			//完成客户端 onlineUsers的初始化
 			user := &message.User{
-				UserId: v,
+				UserId:     v,
 				UserStatus: message.UserOnline,
 			}
 			onlineUsers[v] = user
